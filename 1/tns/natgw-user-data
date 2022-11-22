@@ -1,0 +1,25 @@
+#cloud-config
+users:
+  - default
+  - name: terraform
+    gecos: terraform
+    primary_group: hashicorp
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    ssh_import_id:
+    lock_passwd: false
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCG9umMNi0vZcJCRttfHoGIHJXIgJeH+bZGurxFr+7IPPGFFSwEn1Exlp1Qpwj2lQ0yb1MC/zZUH8Ep0LhdWtkkpRSpRtrIyOI2FTv+dUuLnq6nP5gEDkW+VznQjMluYGp//nCG5eBbnsvloe4CFM73wlwPpKHx0a+JFox75msy+BI34oDgbl1zoQkL4uS10zXbK1qxzRe4dG/EjPKKLFTGrIz7IU1qUMS8ACBcov8s9eyU2pMPvaAWEMTnSX6XOFEKO3YeZv8jVU3KvJZ5yQskCfxNvwtCOwlUmJwTnyNxSzMcZDiOAu9dyQTsamhCBzD0Q/ndk2A71qGbdDPvfQ09
+package_update: true
+packages:
+  - iptables-persistent
+runcmd:
+  - sed -i /etc/sysctl.conf -e '/net.ipv4.ip_forward=1/ s/^.//'
+  - sysctl -p /etc/sysctl.conf
+  - /sbin/iptables -t nat -A POSTROUTING -o ens5 -j MASQUERADE
+  - /usr/sbin/iptables-save > /etc/iptables/rules.v4
+write_files: 
+  - path: /var/tmp/blax
+    owner: root:root
+    permissions: "0644"
+    content: "cloud init was here"
